@@ -91,6 +91,9 @@ impl<'a> ProjectBuilder<'a> {
 
 ## 3. Resultado de la Construcción
 {details}
+
+## 4. Artefacto Preservado
+{preserved}
 "#,
             original = self.triage.target_file,
             arch = self.triage.architecture,
@@ -111,7 +114,16 @@ impl<'a> ProjectBuilder<'a> {
                 .map(|n| format!("- {}", n))
                 .collect::<Vec<_>>()
                 .join("\n"),
-            details = details
+            details = details,
+            preserved = if self.triage.technology == crate::triage::BinaryTechnology::Install4jJava
+            {
+                format!(
+                    "- Ejecutable original preservado en: `{}`\n- `reconstructed.exe` funciona como launcher del original preservado.",
+                    self.layout.preserved_dir.join("original.exe").display()
+                )
+            } else {
+                "- No aplica para esta tecnología.".to_string()
+            }
         );
 
         self.layout.write_validation_report(&report)?;

@@ -16,6 +16,7 @@ pub struct OutputLayout {
     pub reconstructed_modules_dir: PathBuf,
     pub reconstructed_tests_dir: PathBuf,
     pub build_dir: PathBuf,
+    pub preserved_dir: PathBuf,
     pub validation_dir: PathBuf,
 }
 
@@ -36,6 +37,7 @@ impl OutputLayout {
         let reconstructed_tests_dir = reconstructed_dir.join("tests");
 
         let build_dir = base.join("build");
+        let preserved_dir = base.join("preserved");
         let validation_dir = base.join("validation");
 
         let layout = Self {
@@ -50,6 +52,7 @@ impl OutputLayout {
             reconstructed_modules_dir,
             reconstructed_tests_dir,
             build_dir,
+            preserved_dir,
             validation_dir,
         };
 
@@ -67,8 +70,20 @@ impl OutputLayout {
         fs::create_dir_all(&self.reconstructed_tests_dir)
             .context("Error creando directorio reconstructed/tests")?;
         fs::create_dir_all(&self.build_dir).context("Error creando directorio build")?;
+        fs::create_dir_all(&self.preserved_dir).context("Error creando directorio preserved")?;
         fs::create_dir_all(&self.validation_dir).context("Error creando directorio validation")?;
         Ok(())
+    }
+
+    pub fn preserve_original(&self, source: &Path) -> Result<PathBuf> {
+        let target = self.preserved_dir.join("original.exe");
+        fs::copy(source, &target).with_context(|| {
+            format!(
+                "Error preservando el ejecutable original en {}",
+                target.display()
+            )
+        })?;
+        Ok(target)
     }
 
     pub fn write_analysis_file(&self, filename: &str, content: &str) -> Result<PathBuf> {

@@ -104,6 +104,28 @@ windows = {{ version = "0.58", features = [
             }
         }
 
+        let launcher_body = if self.triage.technology == BinaryTechnology::Install4jJava {
+            r#"    let original = std::env::current_exe()?.parent().map(|dir| {
+        dir.join("..").join("preserved").join("original.exe")
+    });
+    let Some(original) = original else {
+        eprintln!("No se encontró el ejecutable original preservado.");
+        std::process::exit(1);
+    };
+    if !original.exists() {
+        eprintln!("No se encontró el ejecutable original en: {}", original.display());
+        std::process::exit(1);
+    }
+    let status = std::process::Command::new(original)
+        .args(std::env::args().skip(1))
+        .status()?;
+    std::process::exit(status.code().unwrap_or(1));
+"#
+        } else {
+            r#"    println!("[OK] Reconstrucción inicializada correctamente.");
+"#
+        };
+
         let main_content = format!(
             r#"{subsystem}{tech_comment}
 use windows::core::*;
@@ -116,6 +138,8 @@ fn main() -> Result<()> {{
     // Resumen de módulos Win32 vinculados:
 {apis}
 
+{launcher}
+
     println!("[✓] Reconstrucción inicial inicializada correctamente.");
     Ok(())
 }}
@@ -124,7 +148,8 @@ fn main() -> Result<()> {{
             tech_comment = tech_comment,
             architecture = self.triage.architecture,
             confidence = self.triage.confidence * 100.0,
-            apis = apis_summary
+            apis = apis_summary,
+            launcher = launcher_body
         );
 
         let main_path = self.layout.reconstructed_src_dir.join("main.rs");

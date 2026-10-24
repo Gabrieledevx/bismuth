@@ -276,6 +276,14 @@ fn run_analysis_pipeline(
     );
     state_mgr.set_triage(triage.clone());
 
+    if matches!(triage.technology, triage::BinaryTechnology::Install4jJava) {
+        let preserved = layout.preserve_original(input)?;
+        state_mgr.log(
+            "INFO",
+            &format!("Artefacto original preservado en {}", preserved.display()),
+        );
+    }
+
     layout.write_analysis_file(
         "executable_info.json",
         &serde_json::to_string_pretty(&triage)?,
