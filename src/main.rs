@@ -3,6 +3,7 @@ mod cli;
 mod codegen;
 mod events;
 mod fs_layout;
+mod local_pe;
 mod rea;
 mod triage;
 mod tui;
@@ -189,7 +190,20 @@ fn run_analysis_pipeline(
         "{} Invocando REA para extracción de importaciones PE...",
         "[*]".yellow()
     );
-    let imports = client.inspect_pe_imports(input)?;
+    let imports = match client.inspect_pe_imports(input) {
+        Ok(value) => {
+            state_mgr.log("REA", "Inventario de APIs obtenido mediante inspect.");
+            value
+        }
+        Err(error) => {
+            let message = format!(
+                "Importaciones no disponibles; se continúa con evidencia parcial: {error:#}"
+            );
+            println!("{} {}", "[!]".yellow(), message);
+            state_mgr.log("WARN", &message);
+            serde_json::json!({"descriptors": [], "availability": "unavailable"})
+        }
+    };
     layout.write_analysis_file(
         "dependencies.json",
         &serde_json::to_string_pretty(&imports)?,
@@ -211,7 +225,16 @@ fn run_analysis_pipeline(
         "{} Invocando REA para verificación Authenticode...",
         "[*]".yellow()
     );
-    let certificates = client.inspect_pe_certificates(input)?;
+    let certificates = match client.inspect_pe_certificates(input) {
+        Ok(value) => value,
+        Err(error) => {
+            let message =
+                format!("Certificados PE no disponibles en la CLI actual de REA: {error:#}");
+            println!("{} {}", "[!]".yellow(), message);
+            state_mgr.log("WARN", &message);
+            serde_json::json!({"signers": [], "availability": "unavailable"})
+        }
+    };
     layout.write_analysis_file(
         "certificates.json",
         &serde_json::to_string_pretty(&certificates)?,

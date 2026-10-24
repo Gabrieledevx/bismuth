@@ -124,11 +124,33 @@ impl TriageAnalyzer {
 
         // 4. Detectar subsistema GUI vs Consola
         let is_gui = all_dlls.contains("user32.dll") || all_dlls.contains("gdi32.dll");
-        let architecture = if imports.get("format").and_then(|f| f.as_str()) == Some("pe32") {
-            "x86 (32-bit)".to_string()
-        } else {
-            "x86_64 (64-bit)".to_string()
-        };
+        let architecture = imports
+            .get("subject")
+            .and_then(|subject| subject.get("architecture"))
+            .and_then(|architecture| architecture.as_str())
+            .or_else(|| {
+                resources
+                    .get("subject")
+                    .and_then(|subject| subject.get("architecture"))
+                    .and_then(|architecture| architecture.as_str())
+            })
+            .map(|architecture| match architecture {
+                "x86" => "x86 (32-bit)".to_string(),
+                "x86_64" => "x86_64 (64-bit)".to_string(),
+                other => other.to_string(),
+            })
+            .unwrap_or_else(|| {
+                if resources
+                    .get("normalized_result")
+                    .and_then(|result| result.get("format"))
+                    .and_then(|format| format.as_str())
+                    == Some("pe32")
+                {
+                    "x86 (32-bit)".to_string()
+                } else {
+                    "x86_64 (64-bit)".to_string()
+                }
+            });
 
         TriageResult {
             target_file: target_path.to_string(),
