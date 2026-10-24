@@ -143,7 +143,7 @@ bismuth rebuild --input "C:\ruta\programa.exe" --output "C:\ruta\resultados"
 
 ## 📜 Licencia y Términos Comerciales
 
-Copyright (c) 2026 **Gabriele Medranda (@Gabrieledevx)**.
+Copyright (c) 2026 **Gabriel Medranda (@Gabrieledevx)**.
 
 Este proyecto se distribuye bajo un esquema de **Licencia Dual**:
 - **Uso Abierto / Gratuito:** Libre para propósitos personales, educativos, de investigación académica y pruebas sin fines de lucro, **con atribución obligatoria al autor original**.
