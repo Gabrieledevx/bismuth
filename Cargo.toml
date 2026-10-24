@@ -1,0 +1,16 @@
+[package]
+name = "bismuth"
+version = "0.1.0"
+edition = "2024"
+authors = ["Gabriele Medranda (@Gabrieledevx)"]
+description = "Motor de Modernizacion y Reconstruccion Automatizada de Binarios Windows en Rust mediante REA"
+license = "SEE LICENSE IN LICENSE.md"
+repository = "https://github.com/Gabrieledevx/bismuth"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+colored = "2.1"
+indicatif = "0.17"
