@@ -1,6 +1,6 @@
 # Bismuth License Agreement
 
-Copyright (c) 2026 Gabriele Medranda (@Gabrieledevx)
+Copyright (c) 2026 Gabriel Medranda (@Gabrieledevx)
 
 Este software se distribuye bajo un modelo de **Licencia Dual (Uso Abierto No Comercial / Licencia Comercial Restringida)**.
 
