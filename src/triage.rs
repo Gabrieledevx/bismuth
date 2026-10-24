@@ -22,6 +22,7 @@ pub struct ImportedApi {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TriageResult {
     pub target_file: String,
+    pub runtime_dir: Option<String>,
     pub technology: BinaryTechnology,
     pub architecture: String,
     pub is_gui: bool,
@@ -154,6 +155,7 @@ impl TriageAnalyzer {
 
         TriageResult {
             target_file: target_path.to_string(),
+            runtime_dir: None,
             technology,
             architecture,
             is_gui,

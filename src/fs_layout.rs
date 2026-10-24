@@ -86,6 +86,12 @@ impl OutputLayout {
         Ok(target)
     }
 
+    pub fn preserve_runtime(&self, source: &Path) -> Result<PathBuf> {
+        let target = self.preserved_dir.join("runtime");
+        copy_directory(source, &target)?;
+        Ok(target)
+    }
+
     pub fn write_analysis_file(&self, filename: &str, content: &str) -> Result<PathBuf> {
         let path = self.analysis_dir.join(filename);
         fs::write(&path, content)
@@ -113,4 +119,22 @@ impl OutputLayout {
             .with_context(|| format!("Error escribiendo reporte {}", path.display()))?;
         Ok(path)
     }
+}
+
+fn copy_directory(source: &Path, target: &Path) -> Result<()> {
+    fs::create_dir_all(target)
+        .with_context(|| format!("Error creando runtime preservado {}", target.display()))?;
+    for entry in
+        fs::read_dir(source).with_context(|| format!("Error leyendo {}", source.display()))?
+    {
+        let entry = entry?;
+        let from = entry.path();
+        let to = target.join(entry.file_name());
+        if from.is_dir() {
+            copy_directory(&from, &to)?;
+        } else {
+            fs::copy(&from, &to).with_context(|| format!("Error copiando {}", from.display()))?;
+        }
+    }
+    Ok(())
 }

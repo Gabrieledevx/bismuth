@@ -115,8 +115,12 @@ impl<'a> ProjectBuilder<'a> {
                 .collect::<Vec<_>>()
                 .join("\n"),
             details = details,
-            preserved = if self.triage.technology == crate::triage::BinaryTechnology::Install4jJava
-            {
+            preserved = if let Some(runtime) = &self.triage.runtime_dir {
+                format!(
+                    "- Runtime completo preservado en: `{}`\n- `reconstructed.exe` funciona como launcher del `BurpSuite.exe` preservado.",
+                    runtime
+                )
+            } else if self.triage.technology == crate::triage::BinaryTechnology::Install4jJava {
                 format!(
                     "- Ejecutable original preservado en: `{}`\n- `reconstructed.exe` funciona como launcher del original preservado.",
                     self.layout.preserved_dir.join("original.exe").display()

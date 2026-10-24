@@ -104,7 +104,17 @@ windows = {{ version = "0.58", features = [
             }
         }
 
-        let launcher_body = if self.triage.technology == BinaryTechnology::Install4jJava {
+        let launcher_body = if self.triage.runtime_dir.is_some() {
+            r#"    let runtime = std::env::current_exe()?.parent().map(|dir| {
+        dir.join("..").join("preserved").join("runtime").join("BurpSuite.exe")
+    });
+    let Some(runtime) = runtime else { eprintln!("No se encontró el runtime preservado."); std::process::exit(1); };
+    let status = std::process::Command::new(runtime)
+        .args(std::env::args().skip(1))
+        .status()?;
+    std::process::exit(status.code().unwrap_or(1));
+"#
+        } else if self.triage.technology == BinaryTechnology::Install4jJava {
             r#"    let original = std::env::current_exe()?.parent().map(|dir| {
         dir.join("..").join("preserved").join("original.exe")
     });

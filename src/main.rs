@@ -163,18 +163,32 @@ fn run_analysis_pipeline(
     output: &Path,
     state_mgr: &StateManager,
 ) -> Result<(OutputLayout, triage::TriageResult)> {
-    ensure!(
-        input.is_file(),
-        "El ejecutable objetivo no existe o no es un archivo: {}",
-        input.display()
-    );
+    ensure!(input.exists(), "El objetivo no existe: {}", input.display());
+    let analysis_target = if input.is_dir() {
+        let candidate = input.join("BurpSuite.exe");
+        ensure!(
+            candidate.is_file(),
+            "No se encontró BurpSuite.exe dentro de {}",
+            input.display()
+        );
+        candidate
+    } else {
+        input.to_path_buf()
+    };
     state_mgr.set_stage(PipelineStage::Triage, 10);
     state_mgr.log(
         "INFO",
-        &format!("Iniciando análisis del objetivo: {}", input.display()),
+        &format!(
+            "Iniciando análisis del objetivo: {}",
+            analysis_target.display()
+        ),
     );
 
-    println!("{} Objetivo: {}", "[1/4]".bold().blue(), input.display());
+    println!(
+        "{} Objetivo: {}",
+        "[1/4]".bold().blue(),
+        analysis_target.display()
+    );
     println!(
         "{} Directorio de salida: {}",
         "[2/4]".bold().blue(),
@@ -190,7 +204,7 @@ fn run_analysis_pipeline(
         "{} Invocando REA para extracción de importaciones PE...",
         "[*]".yellow()
     );
-    let imports = match client.inspect_pe_imports(input) {
+    let imports = match client.inspect_pe_imports(&analysis_target) {
         Ok(value) => {
             state_mgr.log("REA", "Inventario de APIs obtenido mediante inspect.");
             value
@@ -213,7 +227,7 @@ fn run_analysis_pipeline(
     state_mgr.set_stage(PipelineStage::ReaExtraction, 40);
     state_mgr.log("REA", "Consultando inspect-pe-resources...");
     println!("{} Invocando REA para árbol de recursos...", "[*]".yellow());
-    let resources = client.inspect_pe_resources(input)?;
+    let resources = client.inspect_pe_resources(&analysis_target)?;
     layout.write_analysis_file(
         "resources_tree.json",
         &serde_json::to_string_pretty(&resources)?,
@@ -225,7 +239,7 @@ fn run_analysis_pipeline(
         "{} Invocando REA para verificación Authenticode...",
         "[*]".yellow()
     );
-    let certificates = match client.inspect_pe_certificates(input) {
+    let certificates = match client.inspect_pe_certificates(&analysis_target) {
         Ok(value) => value,
         Err(error) => {
             let message =
@@ -245,7 +259,7 @@ fn run_analysis_pipeline(
         "{} Invocando REA para inspección de contenedor/empaquetador...",
         "[*]".yellow()
     );
-    let artifact = client.inspect_artifact(input).ok();
+    let artifact = client.inspect_artifact(&analysis_target).ok();
     if let Some(ref art) = artifact {
         layout.write_metadata_file(
             "package_inventory.json",
@@ -260,13 +274,25 @@ fn run_analysis_pipeline(
         "[3/4]".bold().blue()
     );
     let triage = TriageAnalyzer::analyze(
-        &input.to_string_lossy(),
+        &analysis_target.to_string_lossy(),
         &imports,
         &resources,
         &certificates,
         artifact.as_ref(),
     );
 
+    let runtime_dir = if input.is_dir() {
+        let preserved = layout.preserve_runtime(input)?;
+        state_mgr.log(
+            "INFO",
+            &format!("Runtime preservado en {}", preserved.display()),
+        );
+        Some(preserved.to_string_lossy().to_string())
+    } else {
+        None
+    };
+    let mut triage = triage;
+    triage.runtime_dir = runtime_dir;
     let total_funcs: usize = triage.imported_apis.iter().map(|a| a.functions.len()).sum();
     state_mgr.set_target(
         &input.to_string_lossy(),
@@ -276,7 +302,7 @@ fn run_analysis_pipeline(
     );
     state_mgr.set_triage(triage.clone());
 
-    if matches!(triage.technology, triage::BinaryTechnology::Install4jJava) {
+    if matches!(triage.technology, triage::BinaryTechnology::Install4jJava) && input.is_file() {
         let preserved = layout.preserve_original(input)?;
         state_mgr.log(
             "INFO",
