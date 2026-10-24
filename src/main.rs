@@ -3,6 +3,7 @@ mod cli;
 mod codegen;
 mod events;
 mod fs_layout;
+mod java_decompiler;
 mod java_inventory;
 mod local_pe;
 mod rea;
@@ -80,6 +81,24 @@ fn main() -> Result<()> {
             if let Some(handle) = web_thread {
                 let _ = handle.join();
             }
+        }
+        Commands::Java {
+            input,
+            output,
+            package,
+            classes,
+            limit,
+            jadx,
+        } => {
+            println!("=== BISMUTH: DESCOMPILACIÓN JAVA INCREMENTAL ===");
+            java_decompiler::decompile_selected(
+                &input,
+                &output,
+                package.as_deref(),
+                &classes,
+                limit,
+                jadx.as_deref(),
+            )?;
         }
         Commands::Tui { input } => {
             let triage_opt = if let Some(ref target) = input {

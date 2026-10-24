@@ -29,6 +29,9 @@ pub fn inspect_jar(jar_path: &Path) -> Result<JavaInventory> {
     for index in 0..archive.len() {
         let entry = archive.by_index(index)?;
         let name = entry.name().replace('\\', "/");
+        if name.starts_with("META-INF/versions/") {
+            continue;
+        }
         if name == "META-INF/MANIFEST.MF" {
             manifest_present = true;
         }

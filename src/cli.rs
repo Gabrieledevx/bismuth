@@ -64,6 +64,33 @@ pub enum Commands {
         port: u16,
     },
 
+    /// Descompila clases Java seleccionadas de un JAR usando JADX de forma incremental
+    Java {
+        /// Ruta al archivo .jar
+        #[arg(short, long)]
+        input: PathBuf,
+
+        /// Directorio donde guardar las fuentes
+        #[arg(short, long)]
+        output: PathBuf,
+
+        /// Filtra por prefijo de paquete, por ejemplo com.burpsuite
+        #[arg(long)]
+        package: Option<String>,
+
+        /// Descompila una clase concreta; puede repetirse
+        #[arg(long = "class")]
+        classes: Vec<String>,
+
+        /// Máximo de clases nuevas por ejecución
+        #[arg(long, default_value_t = 25)]
+        limit: usize,
+
+        /// Ruta a jadx.bat; si se omite usa JADX_PATH o la instalación local
+        #[arg(long)]
+        jadx: Option<PathBuf>,
+    },
+
     /// Abre la consola interactiva en la terminal (TUI)
     Tui {
         /// Ruta opcional a un ejecutable para inspeccionar
