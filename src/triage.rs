@@ -92,17 +92,27 @@ impl TriageAnalyzer {
         // Comprobación de install4j / Java
         else if target_path.to_lowercase().contains("burp")
             || target_path.to_lowercase().contains("install4j")
-            || serde_json::to_string(resources).unwrap_or_default().contains("install4j")
-            || serde_json::to_string(resources).unwrap_or_default().contains("i4j")
+            || serde_json::to_string(resources)
+                .unwrap_or_default()
+                .contains("install4j")
+            || serde_json::to_string(resources)
+                .unwrap_or_default()
+                .contains("i4j")
         {
             technology = BinaryTechnology::Install4jJava;
             confidence = 0.95;
             notes.push("Detectado empaquetador install4j (Bootloader de aplicación Java). El ejecutable contiene JVM y archivos .jar embebidos.".to_string());
         }
         // Comprobación de PyInstaller
-        else if serde_json::to_string(artifact.unwrap_or(&serde_json::Value::Null)).unwrap_or_default().contains("pyinstaller") {
+        else if serde_json::to_string(artifact.unwrap_or(&serde_json::Value::Null))
+            .unwrap_or_default()
+            .contains("pyinstaller")
+        {
             technology = BinaryTechnology::PyInstaller;
-            notes.push("Detectado contenedor PyInstaller CArchive con código Python empaquetado.".to_string());
+            notes.push(
+                "Detectado contenedor PyInstaller CArchive con código Python empaquetado."
+                    .to_string(),
+            );
         }
         // Comprobación de Electron
         else if all_dlls.contains("node.dll") || all_dlls.contains("ffmpeg.dll") {

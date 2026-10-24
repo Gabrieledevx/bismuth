@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::path::Path;
 use std::process::Command;
 
@@ -27,12 +27,18 @@ impl ReaClient {
             cmd.arg(arg);
         }
 
-        let output = cmd.output()
+        let output = cmd
+            .output()
             .with_context(|| format!("Error ejecutando comando REA '{}'", subcmd))?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            bail!("Comando REA '{}' falló con código {:?}: {}", subcmd, output.status.code(), stderr);
+            bail!(
+                "Comando REA '{}' falló con código {:?}: {}",
+                subcmd,
+                output.status.code(),
+                stderr
+            );
         }
 
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
@@ -60,7 +66,8 @@ impl ReaClient {
     /// Inspecciona los certificados digitales de Authenticode
     pub fn inspect_pe_certificates(&self, target_exe: &Path) -> Result<serde_json::Value> {
         let path_str = target_exe.to_string_lossy();
-        let raw = self.run_rea_command("inspect-pe-certificates", &[&path_str, "--format", "json"])?;
+        let raw =
+            self.run_rea_command("inspect-pe-certificates", &[&path_str, "--format", "json"])?;
         let json: serde_json::Value = serde_json::from_str(&raw)
             .with_context(|| "Error parseando salida JSON de inspect-pe-certificates")?;
         Ok(json)
@@ -69,16 +76,36 @@ impl ReaClient {
     /// Inspecciona si el binario es un contenedor/paquete (e.g. install4j, PyInstaller, Zip)
     pub fn inspect_artifact(&self, target_exe: &Path) -> Result<serde_json::Value> {
         let path_str = target_exe.to_string_lossy();
-        let raw = self.run_rea_command("inspect-artifact", &[&path_str, "--detail", "summary", "--format", "json"])?;
+        let raw = self.run_rea_command(
+            "inspect-artifact",
+            &[&path_str, "--detail", "summary", "--format", "json"],
+        )?;
         let json: serde_json::Value = serde_json::from_str(&raw)
             .with_context(|| "Error parseando salida JSON de inspect-artifact")?;
         Ok(json)
     }
 
     /// Busca procedimientos en el binario nativo (requiere proveedor como ghidra o kuna si está disponible)
-    pub fn search_procedures(&self, target_exe: &Path, pattern: &str, provider: &str) -> Result<serde_json::Value> {
+    pub fn search_procedures(
+        &self,
+        target_exe: &Path,
+        pattern: &str,
+        provider: &str,
+    ) -> Result<serde_json::Value> {
         let path_str = target_exe.to_string_lossy();
-        let raw = self.run_rea_command("search", &[&path_str, pattern, "--kind", "procedures", "--provider", provider, "--format", "json"])?;
+        let raw = self.run_rea_command(
+            "search",
+            &[
+                &path_str,
+                pattern,
+                "--kind",
+                "procedures",
+                "--provider",
+                provider,
+                "--format",
+                "json",
+            ],
+        )?;
         let json: serde_json::Value = serde_json::from_str(&raw)
             .with_context(|| "Error parseando salida JSON de search procedures")?;
         Ok(json)
@@ -88,7 +115,10 @@ impl ReaClient {
     pub fn decompile(&self, target_exe: &Path, procedure: &str, provider: &str) -> Result<String> {
         let path_str = target_exe.to_string_lossy();
         let proc_flag = format!("--procedure={}", procedure);
-        let raw = self.run_rea_command("decompile", &[&path_str, &proc_flag, "--provider", provider])?;
+        let raw = self.run_rea_command(
+            "decompile",
+            &[&path_str, &proc_flag, "--provider", provider],
+        )?;
         Ok(raw)
     }
 }

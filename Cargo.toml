@@ -2,7 +2,7 @@
 name = "bismuth"
 version = "0.1.0"
 edition = "2024"
-authors = ["Gabriele Medranda (@Gabrieledevx)"]
+authors = ["Gabriel Medranda (@Gabrieledevx)"]
 description = "Motor de Modernizacion y Reconstruccion Automatizada de Binarios Windows en Rust mediante REA"
 license = "SEE LICENSE IN LICENSE.md"
 repository = "https://github.com/Gabrieledevx/bismuth"
@@ -14,3 +14,8 @@ serde_json = "1.0"
 anyhow = "1.0"
 colored = "2.1"
 indicatif = "0.17"
+crossterm = "0.28"
+ratatui = "0.29"
+tiny_http = "0.12"
+sysinfo = "0.33"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }

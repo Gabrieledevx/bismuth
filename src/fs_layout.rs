@@ -22,19 +22,19 @@ pub struct OutputLayout {
 impl OutputLayout {
     pub fn new(base_dir: impl AsRef<Path>) -> Result<Self> {
         let base = base_dir.as_ref().to_path_buf();
-        
+
         let analysis_dir = base.join("analysis");
         let pseudocode_dir = analysis_dir.join("pseudocode");
-        
+
         let extracted_dir = base.join("extracted");
         let resources_dir = extracted_dir.join("resources");
         let metadata_dir = extracted_dir.join("metadata");
-        
+
         let reconstructed_dir = base.join("reconstructed");
         let reconstructed_src_dir = reconstructed_dir.join("src");
         let reconstructed_modules_dir = reconstructed_src_dir.join("modules");
         let reconstructed_tests_dir = reconstructed_dir.join("tests");
-        
+
         let build_dir = base.join("build");
         let validation_dir = base.join("validation");
 
@@ -58,22 +58,16 @@ impl OutputLayout {
     }
 
     pub fn ensure_directories(&self) -> Result<()> {
-        fs::create_dir_all(&self.analysis_dir)
-            .context("Error creando directorio analysis")?;
-        fs::create_dir_all(&self.pseudocode_dir)
-            .context("Error creando directorio pseudocode")?;
-        fs::create_dir_all(&self.resources_dir)
-            .context("Error creando directorio resources")?;
-        fs::create_dir_all(&self.metadata_dir)
-            .context("Error creando directorio metadata")?;
+        fs::create_dir_all(&self.analysis_dir).context("Error creando directorio analysis")?;
+        fs::create_dir_all(&self.pseudocode_dir).context("Error creando directorio pseudocode")?;
+        fs::create_dir_all(&self.resources_dir).context("Error creando directorio resources")?;
+        fs::create_dir_all(&self.metadata_dir).context("Error creando directorio metadata")?;
         fs::create_dir_all(&self.reconstructed_modules_dir)
             .context("Error creando directorio reconstructed/src/modules")?;
         fs::create_dir_all(&self.reconstructed_tests_dir)
             .context("Error creando directorio reconstructed/tests")?;
-        fs::create_dir_all(&self.build_dir)
-            .context("Error creando directorio build")?;
-        fs::create_dir_all(&self.validation_dir)
-            .context("Error creando directorio validation")?;
+        fs::create_dir_all(&self.build_dir).context("Error creando directorio build")?;
+        fs::create_dir_all(&self.validation_dir).context("Error creando directorio validation")?;
         Ok(())
     }
 

@@ -97,7 +97,10 @@ windows = {{ version = "0.58", features = [
                 apis_summary.push_str(&format!("    //   - {}\n", f));
             }
             if api.functions.len() > 5 {
-                apis_summary.push_str(&format!("    //   ... y {} funciones más\n", api.functions.len() - 5));
+                apis_summary.push_str(&format!(
+                    "    //   ... y {} funciones más\n",
+                    api.functions.len() - 5
+                ));
             }
         }
 
@@ -107,8 +110,8 @@ use windows::core::*;
 
 fn main() -> Result<()> {{
     println!("=== Reconstructed App (Bismuth / REA) ===");
-    println!("Arquitectura objetivo: {}");
-    println!("Nivel de confianza: {:.1}%");
+    println!("Arquitectura objetivo: {architecture}");
+    println!("Nivel de confianza: {confidence:.1}%");
     
     // Resumen de módulos Win32 vinculados:
 {apis}
@@ -119,8 +122,8 @@ fn main() -> Result<()> {{
 "#,
             subsystem = subsystem_attr,
             tech_comment = tech_comment,
-            self.triage.architecture,
-            self.triage.confidence * 100.0,
+            architecture = self.triage.architecture,
+            confidence = self.triage.confidence * 100.0,
             apis = apis_summary
         );
 

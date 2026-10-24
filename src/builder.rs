@@ -38,7 +38,9 @@ impl<'a> ProjectBuilder<'a> {
         let success = build_output.status.success();
         let details = if success {
             // Copiar el ejecutable generado a output/build/reconstructed.exe
-            let built_exe = self.layout.reconstructed_dir
+            let built_exe = self
+                .layout
+                .reconstructed_dir
                 .join("target")
                 .join("release")
                 .join("reconstructed_app.exe");
@@ -46,9 +48,13 @@ impl<'a> ProjectBuilder<'a> {
             let target_exe = self.layout.build_dir.join("reconstructed.exe");
             if built_exe.exists() {
                 fs::copy(&built_exe, &target_exe)?;
-                format!("Binario compilado exitosamente y ubicado en: {}", target_exe.display())
+                format!(
+                    "Binario compilado exitosamente y ubicado en: {}",
+                    target_exe.display()
+                )
             } else {
-                "Compilación finalizada pero el archivo .exe no fue encontrado en target/release/".to_string()
+                "Compilación finalizada pero el archivo .exe no fue encontrado en target/release/"
+                    .to_string()
             }
         } else {
             let stderr = String::from_utf8_lossy(&build_output.stderr);
@@ -91,8 +97,20 @@ impl<'a> ProjectBuilder<'a> {
             tech = self.triage.technology,
             confidence = self.triage.confidence * 100.0,
             status = status_badge,
-            apis = self.triage.imported_apis.iter().map(|a| format!("- **{}**: {} APIs", a.dll, a.functions.len())).collect::<Vec<_>>().join("\n"),
-            notes = self.triage.notes.iter().map(|n| format!("- {}", n)).collect::<Vec<_>>().join("\n"),
+            apis = self
+                .triage
+                .imported_apis
+                .iter()
+                .map(|a| format!("- **{}**: {} APIs", a.dll, a.functions.len()))
+                .collect::<Vec<_>>()
+                .join("\n"),
+            notes = self
+                .triage
+                .notes
+                .iter()
+                .map(|n| format!("- {}", n))
+                .collect::<Vec<_>>()
+                .join("\n"),
             details = details
         );
 

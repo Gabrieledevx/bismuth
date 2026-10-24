@@ -130,6 +130,42 @@ Para sintetizar el proyecto Rust a partir de un binario previamente analizado:
 bismuth rebuild --input "C:\ruta\programa.exe" --output "C:\ruta\resultados"
 ```
 
+### 5. Consola Interactiva en Terminal (TUI)
+Abre un dashboard interactivo en tiempo real directamente en tu consola:
+```powershell
+bismuth tui --input "C:\ruta\programa.exe"
+```
+
+### 6. Dashboard Visual Web en Vivo (Navegador)
+Inicia un servidor local y abre una interfaz moderna con gráficos, visor de APIs y consola de logs en vivo en `http://localhost:3000`:
+```powershell
+bismuth web --input "C:\ruta\programa.exe" --port 3000
+
+# O ejecuta el pipeline completo abriendo el dashboard automáticamente:
+bismuth full --input "C:\ruta\programa.exe" --output "C:\ruta\resultados" --web
+```
+
+Con `--web`, el dashboard se inicia antes del pipeline y muestra el progreso mientras el proceso sigue ejecutándose. Puedes indicar otro puerto con `--port 3000`.
+
+Para observar ambos lados en Windows PowerShell, ejecuta el pipeline en una terminal y abre el dashboard en el navegador:
+
+```powershell
+.\target\release\bismuth.exe full --input "C:\ruta\programa.exe" --output "C:\ruta\resultados" --web --port 3000
+```
+
+La terminal muestra el flujo REA/Cargo y el navegador muestra `http://localhost:3000`. Si prefieres dos ventanas separadas:
+
+```powershell
+Start-Process powershell -ArgumentList '-NoExit', '-Command', '.\target\release\bismuth.exe full --input "C:\ruta\programa.exe" --output "C:\ruta\resultados" --web --port 3000'
+Start-Process 'http://localhost:3000'
+```
+
+El endpoint `http://localhost:3000/health` responde `ok` cuando el dashboard está disponible.
+
+### Métricas de sesión y host
+
+El dashboard muestra el identificador de sesión, hora local de inicio, hora de finalización y duración total del pipeline. También muestra el uso global de CPU del host, número de núcleos y memoria usada frente a la memoria total. Estas métricas son orientativas del equipo completo, no solo del proceso Bismuth.
+
 ---
 
 ## 🛡️ Principios Técnicos y Éticos
