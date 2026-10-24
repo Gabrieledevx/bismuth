@@ -3,6 +3,7 @@ mod cli;
 mod codegen;
 mod events;
 mod fs_layout;
+mod java_inventory;
 mod local_pe;
 mod rea;
 mod triage;
@@ -293,6 +294,25 @@ fn run_analysis_pipeline(
     };
     let mut triage = triage;
     triage.runtime_dir = runtime_dir;
+    if input.is_dir() {
+        let jar = input.join("burpsuite.jar");
+        if jar.is_file() {
+            state_mgr.log("JAVA", "Inventariando burpsuite.jar...");
+            let inventory = java_inventory::inspect_jar(&jar)?;
+            layout.write_analysis_file(
+                "java_inventory.json",
+                &serde_json::to_string_pretty(&inventory)?,
+            )?;
+            triage.notes.push(format!(
+                "JAR Java inventariado: {} clases, {} paquetes y {} recursos.",
+                inventory.class_count, inventory.package_count, inventory.resource_count
+            ));
+        } else {
+            triage
+                .notes
+                .push("No se encontró burpsuite.jar en el runtime.".to_string());
+        }
+    }
     let total_funcs: usize = triage.imported_apis.iter().map(|a| a.functions.len()).sum();
     state_mgr.set_target(
         &input.to_string_lossy(),
